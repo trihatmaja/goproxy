@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/signal"
 	"sync"
+	"syscall"
 	"time"
 )
 
@@ -68,7 +69,7 @@ func StartProxy(wg *sync.WaitGroup) {
 
 func main() {
 	interrupt := make(chan os.Signal, 1)
-	signal.Notify(interrupt, os.Interrupt)
+	signal.Notify(interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	wg := &sync.WaitGroup{}
 	StartEchoServer(wg)
 	StartProxy(wg)
@@ -83,8 +84,10 @@ func main() {
 		Proxy:           http.ProxyURL(surl),
 	}
 
-	time.Sleep(10 * time.Second)
+	// wait till the echo server and the proxy ready
+	time.Sleep(1 * time.Second)
 
+	// connect to the echoserver
 	c, _, err := dialer.Dial(endpointUrl, nil)
 	if err != nil {
 		log.Fatal("dial:", err)
