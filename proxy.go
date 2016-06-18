@@ -9,6 +9,7 @@ import (
 	"os"
 	"regexp"
 	"sync/atomic"
+	"time"
 )
 
 // The basic proxy type. Implements http.Handler.
@@ -18,12 +19,14 @@ type ProxyHttpServer struct {
 	sess int64
 	// setting Verbose to true will log information on each request sent to the proxy
 	Verbose         bool
+	LimitRequest    int
 	Logger          *log.Logger
 	NonproxyHandler http.Handler
 	reqHandlers     []ReqHandler
 	respHandlers    []RespHandler
 	httpsHandlers   []HttpsHandler
 	Tr              *http.Transport
+	limit           *RateLimiter
 	// ConnectDial will be used to create TCP connections for CONNECT requests
 	// if nil Tr.Dial will be used
 	ConnectDial func(network string, addr string) (net.Conn, error)
@@ -94,6 +97,13 @@ func removeProxyHeaders(ctx *ProxyCtx, r *http.Request) {
 // Standard net/http function. Shouldn't be used directly, http.Serve will use it.
 func (proxy *ProxyHttpServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	//r.Header["X-Forwarded-For"] = w.RemoteAddr()
+
+	// if the request is above the limit that provided
+	// it will be send 429 too many request
+	if proxy.limit.Limit() {
+		http.Error(w, "", 429)
+		return
+	}
 	if r.Method == "CONNECT" {
 		proxy.handleHttps(w, r)
 	} else {
@@ -145,7 +155,7 @@ func (proxy *ProxyHttpServer) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 }
 
 // New proxy server, logs to StdErr by default
-func NewProxyHttpServer() *ProxyHttpServer {
+func NewProxyHttpServer(limitRequest int) *ProxyHttpServer {
 	proxy := ProxyHttpServer{
 		Logger:        log.New(os.Stderr, "", log.LstdFlags),
 		reqHandlers:   []ReqHandler{},
@@ -156,6 +166,7 @@ func NewProxyHttpServer() *ProxyHttpServer {
 		}),
 		Tr: &http.Transport{TLSClientConfig: tlsClientSkipVerify,
 			Proxy: http.ProxyFromEnvironment},
+		limit: NewRateLimiter(limitRequest, time.Second),
 	}
 	proxy.ConnectDial = dialerFromEnv(&proxy)
 	return &proxy
