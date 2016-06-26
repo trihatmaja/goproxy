@@ -30,7 +30,7 @@ func hashSortedBigInt(lst []string) *big.Int {
 	return rv
 }
 
-var goproxySignerVersion = ":goroxy1"
+var goproxySignerVersion = ":goproxy1"
 
 func signHost(ca tls.Certificate, hosts []string) (cert tls.Certificate, err error) {
 	var x509ca *x509.Certificate

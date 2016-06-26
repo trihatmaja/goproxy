@@ -54,8 +54,7 @@ To get a taste of `goproxy`, a basic HTTP/HTTPS transparent proxy
     )
 
     func main() {
-        // add rate limit request per second
-        proxy := goproxy.NewProxyHttpServer(1000)
+        proxy := goproxy.NewProxyHttpServer()
         proxy.Verbose = true
         log.Fatal(http.ListenAndServe(":8080", proxy))
     }
