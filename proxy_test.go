@@ -17,7 +17,6 @@ import (
 	"os/exec"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/trihatmaja/goproxy"
 	"github.com/trihatmaja/goproxy/ext/image"
