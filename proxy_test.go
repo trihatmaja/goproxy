@@ -26,6 +26,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var telo string
+
 var acceptAllCerts = &tls.Config{InsecureSkipVerify: true}
 
 var noProxyClient = &http.Client{Transport: &http.Transport{TLSClientConfig: acceptAllCerts}}
