@@ -94,7 +94,7 @@ func removeProxyHeaders(ctx *ProxyCtx, r *http.Request) {
 
 // Standard net/http function. Shouldn't be used directly, http.Serve will use it.
 func (proxy *ProxyHttpServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	r.Header["X-Forwarded-For"] = w.RemoteAddr()
+	// r.Header["X-Forwarded-For"] = w.RemoteAddr()
 
 	if r.Method == "CONNECT" {
 		proxy.handleHttps(w, r)
@@ -154,7 +154,7 @@ func (proxy *ProxyHttpServer) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 
 // New proxy server, logs to StdErr by default
 func NewProxyHttpServer() *ProxyHttpServer {
-  proxy := ProxyHttpServer{
+	proxy := ProxyHttpServer{
 		Logger:        log.New(os.Stderr, "", log.LstdFlags),
 		reqHandlers:   []ReqHandler{},
 		respHandlers:  []RespHandler{},
