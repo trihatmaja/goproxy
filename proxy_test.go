@@ -27,6 +27,7 @@ import (
 )
 
 var tahahslh string
+var hihihi string
 
 var acceptAllCerts = &tls.Config{InsecureSkipVerify: true}
 
