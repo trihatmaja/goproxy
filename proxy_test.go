@@ -27,7 +27,6 @@ import (
 )
 
 var telo string
-var bakar string
 
 var acceptAllCerts = &tls.Config{InsecureSkipVerify: true}
 
